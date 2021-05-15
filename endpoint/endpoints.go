@@ -70,13 +70,18 @@ type GetCrimesRequest struct {
 }
 
 type GetCrimeResponse struct {
-	Crimes []domain.Crime
+	Crimes []domain.Crime `json:"crimes"`
 }
 
 func MakeGetCrimesEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		_ = request.(*GetCrimesRequest)
-		return s.GetCrimes(ctx)
+		res, err := s.GetCrimes(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return GetCrimeResponse{*res}, nil
 	}
 }
 

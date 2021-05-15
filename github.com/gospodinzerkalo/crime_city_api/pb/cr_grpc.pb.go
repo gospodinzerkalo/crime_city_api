@@ -95,5 +95,5 @@ var CrimeService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "pb/crime.proto",
+	Metadata: "pb/cr.proto",
 }

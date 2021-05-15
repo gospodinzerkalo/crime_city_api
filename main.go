@@ -4,13 +4,16 @@ import (
 	"flag"
 	"fmt"
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	"github.com/gospodinzerkalo/crime_city_api/endpoint"
+	"github.com/gospodinzerkalo/crime_city_api/pb"
 	"github.com/gospodinzerkalo/crime_city_api/service"
 	"github.com/gospodinzerkalo/crime_city_api/store/postgres"
 	"github.com/gospodinzerkalo/crime_city_api/transport"
 	"github.com/joho/godotenv"
 	"github.com/oklog/oklog/pkg/group"
 	"github.com/urfave/cli/v2"
+	"google.golang.org/grpc"
 	"net"
 	"net/http"
 	"os"
@@ -90,6 +93,7 @@ func run(c *cli.Context) error {
 	svc := service.NewService(store, logger)
 	endpoints := endpoint.NewEndpointsFactory(svc, logger)
 	httpHandler := transport.MakeHTTPHandler(endpoints, logger)
+	grpcServer := transport.NewGRPCServer(endpoints, logger)
 
 
 	var g group.Group
@@ -105,6 +109,22 @@ func run(c *cli.Context) error {
 			return http.Serve(httpListener, httpHandler)
 		}, func(error) {
 			httpListener.Close()
+		})
+	}
+	{
+		// The gRPC listener mounts the Go kit gRPS handler we created.
+		grpcListener, err := net.Listen("tcp", ":50051")
+		if err != nil {
+			logger.Log("during", "Listen", "err", err)
+			os.Exit(1)
+		}
+		g.Add(func() error {
+			baseServer := grpc.NewServer()
+			pb.RegisterCrimeServiceServer(baseServer, grpcServer)
+			level.Info(logger).Log("msg", "Server started successfully 🚀")
+			return baseServer.Serve(grpcListener)
+		}, func(error) {
+			grpcListener.Close()
 		})
 	}
 	{

@@ -33,7 +33,7 @@ func (g *gRPCServer) GetCrimes(ctx context.Context, request *pb.GetCrimeRequest)
 
 func decodeGetCrimesRequest(_ context.Context, request interface{}) (interface{}, error) {
 	_ = request.(*pb.GetCrimeRequest)
-	return endpoint.GetCrimesRequest{}, nil
+	return &endpoint.GetCrimesRequest{}, nil
 }
 
 func encodeGetCrimesResponse(_ context.Context, response interface{}) (interface{}, error) {
