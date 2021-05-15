@@ -3,9 +3,9 @@ package endpoint
 import (
 	"context"
 	"github.com/go-kit/kit/endpoint"
+	"github.com/go-kit/kit/log"
 	"github.com/gospodinzerkalo/crime_city_api/domain"
 	"github.com/gospodinzerkalo/crime_city_api/service"
-	"github.com/go-kit/kit/log"
 )
 
 type Endpoints struct {
@@ -67,6 +67,10 @@ func MakeCreateCrimeEndpoint(s service.Service) endpoint.Endpoint {
 
 type GetCrimesRequest struct {
 
+}
+
+type GetCrimeResponse struct {
+	Crimes []domain.Crime
 }
 
 func MakeGetCrimesEndpoint(s service.Service) endpoint.Endpoint {
