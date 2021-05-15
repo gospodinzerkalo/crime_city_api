@@ -57,7 +57,7 @@ func main() {
 			Usage: "start server",
 		},
 	}
-	app.Run(os.Args)
+	fmt.Println(app.Run(os.Args))
 }
 
 func run(c *cli.Context) error {

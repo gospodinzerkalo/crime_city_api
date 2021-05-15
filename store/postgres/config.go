@@ -3,11 +3,12 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	storeDb "github.com/gospodinzerkalo/crime_city_api/store"
 	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/log/logrusadapter"
 	"github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/sirupsen/logrus"
-	storeDb "github.com/gospodinzerkalo/crime_city_api/store"
 	"os"
 )
 
@@ -46,9 +47,10 @@ func getConnString(cfg Config) string {
 	return connStr
 }
 
-func getDbConn(connStr string) (*sql.DB, error) {
+func getDbConn(connStr string, logger logrus.Logger) (*sql.DB, error) {
 	connConfig, _ := pgx.ParseConfig(connStr)
-	//connConfig.Logger = logger
+	connConfig.Logger = logrusadapter.NewLogger(&logger)
+
 	connConfig.PreferSimpleProtocol = true
 	connStr2 := stdlib.RegisterConnConfig(connConfig)
 	db, err := sql.Open("pgx", connStr2)
@@ -75,8 +77,8 @@ var dbTables = []string{
 	(
 		id SERIAL,
 		location_name TEXT NOT NULL,
-		longitude NUMBER,
-		latitude NUMBER,
+		longitude NUMERIC,
+		latitude NUMERIC,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		description TEXT,
 		image TEXT
@@ -94,9 +96,16 @@ func New(cfg Config) (storeDb.Repository, error) {
 		},
 	}
 
-	db, err := getDbConn(getConnString(cfg))
+	db, err := getDbConn(getConnString(cfg), *logr)
 	if err != nil {
 		panic(fmt.Sprintf("fatal error config file: %s ", err))
+	}
+
+	for _, q := range dbTables {
+		_, err = db.Exec(q)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &store{db: db, log: *logr}, nil
