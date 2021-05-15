@@ -1,13 +1,14 @@
 syntax = "proto3";
 option go_package = "github.com/gospodinzerkalo/crime_city_api/pb";
 service CrimeService {
-    rpc GetCrimes(GetCrimeRequest) returns (GetCrimeResponse) {}
+    rpc GetCrimes(GetCrimesRequest) returns (GetCrimesResponse) {}
+
 }
 
-message GetCrimeRequest {
+message GetCrimesRequest {
 }
 
-message GetCrimeResponse {
+message GetCrimesResponse {
    repeated Crime crimes = 1;
 }
 
@@ -20,3 +21,4 @@ message Crime {
     string      image = 6;
     string      date = 7;
 }
+

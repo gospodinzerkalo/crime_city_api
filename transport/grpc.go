@@ -23,16 +23,16 @@ func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger) pb.CrimeServ
 	}
 }
 
-func (g *gRPCServer) GetCrimes(ctx context.Context, request *pb.GetCrimeRequest) (*pb.GetCrimeResponse, error) {
+func (g *gRPCServer) GetCrimes(ctx context.Context, request *pb.GetCrimesRequest) (*pb.GetCrimesResponse, error) {
 	_, resp, err := g.getCrimes.ServeGRPC(ctx, request)
 	if err != nil {
 		return nil, err
 	}
-	return resp.(*pb.GetCrimeResponse), nil
+	return resp.(*pb.GetCrimesResponse), nil
 }
 
 func decodeGetCrimesRequest(_ context.Context, request interface{}) (interface{}, error) {
-	_ = request.(*pb.GetCrimeRequest)
+	_ = request.(*pb.GetCrimesRequest)
 	return &endpoint.GetCrimesRequest{}, nil
 }
 
@@ -50,5 +50,5 @@ func encodeGetCrimesResponse(_ context.Context, response interface{}) (interface
 			Date:         crime.Date,
 		})
 	}
-	return &pb.GetCrimeResponse{Crimes: crimes}, nil
+	return &pb.GetCrimesResponse{Crimes: crimes}, nil
 }
