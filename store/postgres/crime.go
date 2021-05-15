@@ -35,7 +35,7 @@ func (s *store) GetCrimes() (*[]domain.Crime, error) {
 
 func (s *store) GetCrime(id int64) (*domain.Crime, error) {
 	var crime domain.Crime
-	if err := s.db.QueryRow("SELECT id, location_name, longitude, latitude, created_at, description, image FROM crimes WHERE id = $1").Scan(
+	if err := s.db.QueryRow("SELECT id, location_name, longitude, latitude, created_at, description, image FROM crimes WHERE id = $1", id).Scan(
 		&crime.ID, &crime.LocationName, &crime.Longitude, &crime.Latitude, &crime.Date, &crime.Description, &crime.Image,
 		); err != nil {
 			return nil, err

@@ -69,7 +69,7 @@ type GetCrimesRequest struct {
 
 }
 
-type GetCrimeResponse struct {
+type GetCrimesResponse struct {
 	Crimes []domain.Crime `json:"crimes"`
 }
 
@@ -81,7 +81,7 @@ func MakeGetCrimesEndpoint(s service.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		return GetCrimeResponse{*res}, nil
+		return GetCrimesResponse{*res}, nil
 	}
 }
 
@@ -89,10 +89,19 @@ type GetCrimeRequest struct {
 	ID 		int64
 }
 
+type GetCrimeResponse struct {
+	domain.Crime
+}
+
 func MakeGetCrimeEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(*GetCrimeRequest)
-		return s.GetCrime(ctx, req.ID)
+		res, err := s.GetCrime(ctx, req.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		return GetCrimeResponse{*res}, nil
 	}
 }
 

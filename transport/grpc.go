@@ -9,7 +9,8 @@ import (
 )
 
 type gRPCServer struct {
-	getCrimes gt.Handler
+	getCrimes 		gt.Handler
+	getCrime 		gt.Handler
 }
 
 // NewGRPCServer initializes a new gRPC server
@@ -20,6 +21,12 @@ func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger) pb.CrimeServ
 			decodeGetCrimesRequest,
 			encodeGetCrimesResponse,
 		),
+		getCrime: gt.NewServer(
+			endpoints.GetCrime,
+			decodeGetCrimeRequest,
+			encodeGetCrimeResponse,
+		),
+
 	}
 }
 
@@ -37,7 +44,7 @@ func decodeGetCrimesRequest(_ context.Context, request interface{}) (interface{}
 }
 
 func encodeGetCrimesResponse(_ context.Context, response interface{}) (interface{}, error) {
-	resp := response.(endpoint.GetCrimeResponse)
+	resp := response.(endpoint.GetCrimesResponse)
 	var crimes []*pb.Crime
 	for _, crime := range resp.Crimes {
 		crimes = append(crimes, &pb.Crime{
@@ -51,4 +58,31 @@ func encodeGetCrimesResponse(_ context.Context, response interface{}) (interface
 		})
 	}
 	return &pb.GetCrimesResponse{Crimes: crimes}, nil
+}
+
+func (g *gRPCServer) GetCrime(ctx context.Context, request *pb.GetCrimeRequest) (*pb.GetCrimeResponse, error) {
+	_, resp, err := g.getCrime.ServeGRPC(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*pb.GetCrimeResponse), nil
+}
+
+func decodeGetCrimeRequest(_ context.Context, request interface{}) (interface{}, error) {
+	req := request.(*pb.GetCrimeRequest)
+	return &endpoint.GetCrimeRequest{ID: req.Id}, nil
+}
+
+func encodeGetCrimeResponse(_ context.Context, response interface{}) (interface{}, error) {
+	resp := response.(endpoint.GetCrimeResponse)
+
+	return &pb.GetCrimeResponse{Crime: &pb.Crime{
+		Id:           resp.ID,
+		LocationName: resp.LocationName,
+		Longitude:    resp.Longitude,
+		Latitude:     resp.Latitude,
+		Description:  resp.Description,
+		Image:        resp.Image,
+		Date:         resp.Date,
+	}}, nil
 }

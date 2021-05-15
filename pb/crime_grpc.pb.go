@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CrimeServiceClient interface {
 	GetCrimes(ctx context.Context, in *GetCrimesRequest, opts ...grpc.CallOption) (*GetCrimesResponse, error)
+	GetCrime(ctx context.Context, in *GetCrimeRequest, opts ...grpc.CallOption) (*GetCrimeResponse, error)
 }
 
 type crimeServiceClient struct {
@@ -38,11 +39,21 @@ func (c *crimeServiceClient) GetCrimes(ctx context.Context, in *GetCrimesRequest
 	return out, nil
 }
 
+func (c *crimeServiceClient) GetCrime(ctx context.Context, in *GetCrimeRequest, opts ...grpc.CallOption) (*GetCrimeResponse, error) {
+	out := new(GetCrimeResponse)
+	err := c.cc.Invoke(ctx, "/CrimeService/GetCrime", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CrimeServiceServer is the server API for CrimeService service.
 // All implementations should embed UnimplementedCrimeServiceServer
 // for forward compatibility
 type CrimeServiceServer interface {
 	GetCrimes(context.Context, *GetCrimesRequest) (*GetCrimesResponse, error)
+	GetCrime(context.Context, *GetCrimeRequest) (*GetCrimeResponse, error)
 }
 
 // UnimplementedCrimeServiceServer should be embedded to have forward compatible implementations.
@@ -51,6 +62,9 @@ type UnimplementedCrimeServiceServer struct {
 
 func (UnimplementedCrimeServiceServer) GetCrimes(context.Context, *GetCrimesRequest) (*GetCrimesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCrimes not implemented")
+}
+func (UnimplementedCrimeServiceServer) GetCrime(context.Context, *GetCrimeRequest) (*GetCrimeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCrime not implemented")
 }
 
 // UnsafeCrimeServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -82,6 +96,24 @@ func _CrimeService_GetCrimes_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CrimeService_GetCrime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCrimeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CrimeServiceServer).GetCrime(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/CrimeService/GetCrime",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CrimeServiceServer).GetCrime(ctx, req.(*GetCrimeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CrimeService_ServiceDesc is the grpc.ServiceDesc for CrimeService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -92,6 +124,10 @@ var CrimeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCrimes",
 			Handler:    _CrimeService_GetCrimes_Handler,
+		},
+		{
+			MethodName: "GetCrime",
+			Handler:    _CrimeService_GetCrime_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
