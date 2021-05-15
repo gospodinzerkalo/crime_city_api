@@ -8,7 +8,6 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/sirupsen/logrus"
 	storeDb "github.com/gospodinzerkalo/crime_city_api/store"
-	"log"
 	"os"
 )
 
@@ -47,9 +46,9 @@ func getConnString(cfg Config) string {
 	return connStr
 }
 
-func getDbConn(connStr string, logger pgx.Logger) (*sql.DB, error) {
+func getDbConn(connStr string) (*sql.DB, error) {
 	connConfig, _ := pgx.ParseConfig(connStr)
-	connConfig.Logger = logger
+	//connConfig.Logger = logger
 	connConfig.PreferSimpleProtocol = true
 	connStr2 := stdlib.RegisterConnConfig(connConfig)
 	db, err := sql.Open("pgx", connStr2)
@@ -95,7 +94,7 @@ func New(cfg Config) (storeDb.Repository, error) {
 		},
 	}
 
-	db, err := getDbConn(getConnString(cfg), logr)
+	db, err := getDbConn(getConnString(cfg))
 	if err != nil {
 		panic(fmt.Sprintf("fatal error config file: %s ", err))
 	}
