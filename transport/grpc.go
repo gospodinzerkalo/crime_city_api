@@ -51,10 +51,19 @@ func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger) pb.CrimeServ
 	}
 }
 
+func grpcErrorEncoder(err error) error {
+	switch err {
+	case sql.ErrNoRows:
+		return status.Error(codes.NotFound, err.Error())
+	default:
+		return status.Error(codes.Internal, err.Error())
+	}
+}
+
 func (g *gRPCServer) GetCrimes(ctx context.Context, request *pb.GetCrimesRequest) (*pb.GetCrimesResponse, error) {
 	_, resp, err := g.getCrimes.ServeGRPC(ctx, request)
 	if err != nil {
-		return nil, err
+		return nil, grpcErrorEncoder(err)
 	}
 	return resp.(*pb.GetCrimesResponse), nil
 }
@@ -84,7 +93,7 @@ func encodeGetCrimesResponse(_ context.Context, response interface{}) (interface
 func (g *gRPCServer) GetCrime(ctx context.Context, request *pb.GetCrimeRequest) (*pb.GetCrimeResponse, error) {
 	_, resp, err := g.getCrime.ServeGRPC(ctx, request)
 	if err != nil {
-		return nil, err
+		return nil, grpcErrorEncoder(err)
 	}
 	return resp.(*pb.GetCrimeResponse), nil
 }
@@ -110,7 +119,10 @@ func encodeGetCrimeResponse(_ context.Context, response interface{}) (interface{
 
 func (g *gRPCServer) CreateHome(ctx context.Context, request *pb.CreateHomeRequest) (*pb.CreateHomeResponse, error) {
 	_, resp, err := g.createHome.ServeGRPC(ctx, request)
-	return resp.(*pb.CreateHomeResponse), err
+	if err != nil {
+		return nil, grpcErrorEncoder(err)
+	}
+	return resp.(*pb.CreateHomeResponse), nil
 }
 
 func decodeCreateHomeRequest(_ context.Context, request interface{}) (interface{}, error) {
@@ -142,10 +154,7 @@ func encodeCreateHomeResponse(_ context.Context, response interface{}) (interfac
 func (g *gRPCServer) GetHome(ctx context.Context, request *pb.GetHomeRequest) (*pb.GetHomeResponse, error) {
 	_, resp, err := g.getHome.ServeGRPC(ctx, request)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, status.Error(codes.NotFound, err.Error())
-		}
-		return nil, err
+		return nil, grpcErrorEncoder(err)
 	}
 	return resp.(*pb.GetHomeResponse), nil
 }
@@ -171,10 +180,7 @@ func encodeGetHomeResponse(_ context.Context, response interface{}) (interface{}
 func (g *gRPCServer) DeleteHome(ctx context.Context, request *pb.DeleteHomeRequest) (*pb.DeleteHomeResponse, error) {
 	_, resp, err := g.deleteHome.ServeGRPC(ctx, request)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, status.Error(codes.NotFound, err.Error())
-		}
-		return nil, err
+		return nil, grpcErrorEncoder(err)
 	}
 	return resp.(*pb.DeleteHomeResponse), nil
 }
