@@ -3,6 +3,9 @@ option go_package = "github.com/gospodinzerkalo/crime_city_api/pb";
 service CrimeService {
     rpc GetCrimes(GetCrimesRequest) returns (GetCrimesResponse) {}
     rpc GetCrime(GetCrimeRequest) returns (GetCrimeResponse) {}
+
+    rpc CreateHome(CreateHomeRequest) returns (CreateHomeResponse) {}
+    rpc GetHome(GetHomeRequest) returns (GetHomeResponse) {}
 }
 
 message GetCrimesRequest {
@@ -30,3 +33,28 @@ message GetCrimeResponse {
     Crime crime = 1;
 }
 
+message CreateHomeRequest {
+    Home home = 1;
+}
+
+message CreateHomeResponse {
+    Home home = 1;
+}
+
+message Home {
+    int64 id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string user_name = 4;
+    double longitude = 5;
+    double latitude = 6;
+    string image = 7;
+}
+
+message GetHomeRequest {
+    int64 id = 1;
+}
+
+message GetHomeResponse {
+    Home home = 1;
+}

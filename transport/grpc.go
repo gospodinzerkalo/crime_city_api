@@ -11,6 +11,8 @@ import (
 type gRPCServer struct {
 	getCrimes 		gt.Handler
 	getCrime 		gt.Handler
+	createHome		gt.Handler
+	getHome			gt.Handler
 }
 
 // NewGRPCServer initializes a new gRPC server
@@ -26,7 +28,16 @@ func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger) pb.CrimeServ
 			decodeGetCrimeRequest,
 			encodeGetCrimeResponse,
 		),
-
+		createHome: gt.NewServer(
+			endpoints.CreateHome,
+			decodeCreateHomeRequest,
+			encodeCreateHomeResponse,
+		),
+		getHome: gt.NewServer(
+			endpoints.GetHome,
+			decodeGetHomeRequest,
+			encodeGetHomeResponse,
+		),
 	}
 }
 
@@ -84,5 +95,59 @@ func encodeGetCrimeResponse(_ context.Context, response interface{}) (interface{
 		Description:  resp.Description,
 		Image:        resp.Image,
 		Date:         resp.Date,
+	}}, nil
+}
+
+func (g *gRPCServer) CreateHome(ctx context.Context, request *pb.CreateHomeRequest) (*pb.CreateHomeResponse, error) {
+	_, resp, err := g.createHome.ServeGRPC(ctx, request)
+	return resp.(*pb.CreateHomeResponse), err
+}
+
+func decodeCreateHomeRequest(_ context.Context, request interface{}) (interface{}, error) {
+	req := request.(*pb.CreateHomeRequest)
+	return endpoint.CreateHomeRequest{
+		ID:        req.Home.Id,
+		FirstName: req.Home.FirstName,
+		LastName:  req.Home.LastName,
+		UserName:  req.Home.UserName,
+		Longitude: req.Home.Longitude,
+		Latitude:  req.Home.Latitude,
+		Image:     req.Home.Image,
+	}, nil
+}
+
+func encodeCreateHomeResponse(_ context.Context, response interface{}) (interface{}, error) {
+	resp := response.(endpoint.CreateHomeResponse)
+	return &pb.CreateHomeResponse{Home: &pb.Home{
+		Id:        resp.ID,
+		FirstName: resp.FirstName,
+		LastName:  resp.LastName,
+		UserName:  resp.UserName,
+		Longitude: resp.Longitude,
+		Latitude:  resp.Latitude,
+		Image:     resp.Image,
+	}}, nil
+}
+
+func (g *gRPCServer) GetHome(ctx context.Context, request *pb.GetHomeRequest) (*pb.GetHomeResponse, error) {
+	_, resp, err := g.getHome.ServeGRPC(ctx, request)
+	return resp.(*pb.GetHomeResponse), err
+}
+
+func decodeGetHomeRequest(_ context.Context, request interface{}) (interface{}, error) {
+	req := request.(*pb.GetHomeRequest)
+	return endpoint.GetHomeRequest{ID: req.Id}, nil
+}
+
+func encodeGetHomeResponse(_ context.Context, response interface{}) (interface{}, error) {
+	resp := response.(endpoint.GetHomeResponse)
+	return &pb.GetHomeResponse{Home: &pb.Home{
+		Id:        resp.ID,
+		FirstName: resp.FirstName,
+		LastName:  resp.LastName,
+		UserName:  resp.UserName,
+		Longitude: resp.Longitude,
+		Latitude:  resp.Latitude,
+		Image:     resp.Image,
 	}}, nil
 }

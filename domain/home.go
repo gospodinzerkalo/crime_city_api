@@ -1,7 +1,7 @@
 package domain
 
 type Home struct {
-	ID        int     `json:"id"`
+	ID        int64     `json:"id"`
 	FirstName string  `json:"first_name"`
 	LastName  string  `json:"last_name"`
 	UserName  string  `json:"user_name"`

@@ -150,7 +150,13 @@ func MakeDeleteCrimeEndpoint(s service.Service) endpoint.Endpoint {
 }
 
 type CreateHomeRequest struct {
-	domain.Home
+	ID        int64     `json:"id"`
+	FirstName string  `json:"first_name"`
+	LastName  string  `json:"last_name"`
+	UserName  string  `json:"user_name"`
+	Longitude float64 `json:"longitude"`
+	Latitude  float64 `json:"latitude"`
+	Image     string  `json:"image"`
 }
 
 type CreateHomeResponse struct {
@@ -160,7 +166,15 @@ type CreateHomeResponse struct {
 func MakeCreateHomeEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(*CreateHomeRequest)
-		res, err := s.CreateHome(ctx, &req.Home)
+		res, err := s.CreateHome(ctx, &domain.Home{
+			ID:        req.ID,
+			FirstName: req.FirstName,
+			LastName:  req.LastName,
+			UserName:  req.UserName,
+			Longitude: req.Longitude,
+			Latitude:  req.Latitude,
+			Image:     req.Image,
+		})
 		if err != nil {
 			return nil, err
 		}
