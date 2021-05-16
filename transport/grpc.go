@@ -2,17 +2,22 @@ package transport
 
 import (
 	"context"
+	"database/sql"
 	"github.com/go-kit/kit/log"
 	gt "github.com/go-kit/kit/transport/grpc"
 	"github.com/gospodinzerkalo/crime_city_api/endpoint"
 	"github.com/gospodinzerkalo/crime_city_api/pb"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type gRPCServer struct {
 	getCrimes 		gt.Handler
 	getCrime 		gt.Handler
+
 	createHome		gt.Handler
 	getHome			gt.Handler
+	deleteHome 		gt.Handler
 }
 
 // NewGRPCServer initializes a new gRPC server
@@ -38,6 +43,11 @@ func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger) pb.CrimeServ
 			decodeGetHomeRequest,
 			encodeGetHomeResponse,
 		),
+		deleteHome: gt.NewServer(
+			endpoints.DeleteHome,
+			decodeDeleteHomeRequest,
+			encodeDeleteHomeResponse,
+			),
 	}
 }
 
@@ -132,6 +142,9 @@ func encodeCreateHomeResponse(_ context.Context, response interface{}) (interfac
 func (g *gRPCServer) GetHome(ctx context.Context, request *pb.GetHomeRequest) (*pb.GetHomeResponse, error) {
 	_, resp, err := g.getHome.ServeGRPC(ctx, request)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
 		return nil, err
 	}
 	return resp.(*pb.GetHomeResponse), nil
@@ -153,4 +166,25 @@ func encodeGetHomeResponse(_ context.Context, response interface{}) (interface{}
 		Latitude:  resp.Latitude,
 		Image:     resp.Image,
 	}}, nil
+}
+
+func (g *gRPCServer) DeleteHome(ctx context.Context, request *pb.DeleteHomeRequest) (*pb.DeleteHomeResponse, error) {
+	_, resp, err := g.deleteHome.ServeGRPC(ctx, request)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
+		return nil, err
+	}
+	return resp.(*pb.DeleteHomeResponse), nil
+}
+
+func decodeDeleteHomeRequest(_ context.Context, request interface{}) (interface{}, error) {
+	req := request.(*pb.DeleteHomeRequest)
+	return &endpoint.DeleteHomeRequest{ID: req.Id}, nil
+}
+
+func encodeDeleteHomeResponse(_ context.Context, response interface{}) (interface{}, error) {
+	_ = response.(endpoint.DeleteHomeResponse)
+	return &pb.DeleteHomeResponse{}, nil
 }

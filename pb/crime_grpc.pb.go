@@ -22,6 +22,7 @@ type CrimeServiceClient interface {
 	GetCrime(ctx context.Context, in *GetCrimeRequest, opts ...grpc.CallOption) (*GetCrimeResponse, error)
 	CreateHome(ctx context.Context, in *CreateHomeRequest, opts ...grpc.CallOption) (*CreateHomeResponse, error)
 	GetHome(ctx context.Context, in *GetHomeRequest, opts ...grpc.CallOption) (*GetHomeResponse, error)
+	DeleteHome(ctx context.Context, in *DeleteHomeRequest, opts ...grpc.CallOption) (*DeleteHomeResponse, error)
 }
 
 type crimeServiceClient struct {
@@ -68,6 +69,15 @@ func (c *crimeServiceClient) GetHome(ctx context.Context, in *GetHomeRequest, op
 	return out, nil
 }
 
+func (c *crimeServiceClient) DeleteHome(ctx context.Context, in *DeleteHomeRequest, opts ...grpc.CallOption) (*DeleteHomeResponse, error) {
+	out := new(DeleteHomeResponse)
+	err := c.cc.Invoke(ctx, "/CrimeService/DeleteHome", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CrimeServiceServer is the server API for CrimeService service.
 // All implementations should embed UnimplementedCrimeServiceServer
 // for forward compatibility
@@ -76,6 +86,7 @@ type CrimeServiceServer interface {
 	GetCrime(context.Context, *GetCrimeRequest) (*GetCrimeResponse, error)
 	CreateHome(context.Context, *CreateHomeRequest) (*CreateHomeResponse, error)
 	GetHome(context.Context, *GetHomeRequest) (*GetHomeResponse, error)
+	DeleteHome(context.Context, *DeleteHomeRequest) (*DeleteHomeResponse, error)
 }
 
 // UnimplementedCrimeServiceServer should be embedded to have forward compatible implementations.
@@ -93,6 +104,9 @@ func (UnimplementedCrimeServiceServer) CreateHome(context.Context, *CreateHomeRe
 }
 func (UnimplementedCrimeServiceServer) GetHome(context.Context, *GetHomeRequest) (*GetHomeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetHome not implemented")
+}
+func (UnimplementedCrimeServiceServer) DeleteHome(context.Context, *DeleteHomeRequest) (*DeleteHomeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteHome not implemented")
 }
 
 // UnsafeCrimeServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -178,6 +192,24 @@ func _CrimeService_GetHome_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CrimeService_DeleteHome_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteHomeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CrimeServiceServer).DeleteHome(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/CrimeService/DeleteHome",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CrimeServiceServer).DeleteHome(ctx, req.(*DeleteHomeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CrimeService_ServiceDesc is the grpc.ServiceDesc for CrimeService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -200,6 +232,10 @@ var CrimeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetHome",
 			Handler:    _CrimeService_GetHome_Handler,
+		},
+		{
+			MethodName: "DeleteHome",
+			Handler:    _CrimeService_DeleteHome_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -50,6 +50,10 @@ func NewEndpointsFactory(s service.Service, log log.Logger) Endpoints {
 	{
 		getHome = MakeGetHomeEndpoint(s)
 	}
+	var deleteHome endpoint.Endpoint
+	{
+		deleteHome = MakeDeleteHomeEndpoint(s)
+	}
 
 	return Endpoints{
 		CreateCrime: createCrime,
@@ -59,6 +63,7 @@ func NewEndpointsFactory(s service.Service, log log.Logger) Endpoints {
 		DeleteCrime: deleteCrime,
 		CreateHome: createHome,
 		GetHome: getHome,
+		DeleteHome: deleteHome,
 	}
 }
 
@@ -200,5 +205,18 @@ func MakeGetHomeEndpoint(s service.Service) endpoint.Endpoint {
 		}
 
 		return GetHomeResponse{*res}, nil
+	}
+}
+
+type DeleteHomeRequest struct {
+	ID 	int64
+}
+
+type DeleteHomeResponse struct {}
+
+func MakeDeleteHomeEndpoint(s service.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(*DeleteHomeRequest)
+		return DeleteHomeResponse{}, s.DeleteHome(ctx, req.ID)
 	}
 }

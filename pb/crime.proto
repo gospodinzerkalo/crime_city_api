@@ -6,10 +6,10 @@ service CrimeService {
 
     rpc CreateHome(CreateHomeRequest) returns (CreateHomeResponse) {}
     rpc GetHome(GetHomeRequest) returns (GetHomeResponse) {}
+    rpc DeleteHome(DeleteHomeRequest) returns (DeleteHomeResponse) {}
 }
 
-message GetCrimesRequest {
-}
+message GetCrimesRequest {}
 
 message GetCrimesResponse {
    repeated Crime crimes = 1;
@@ -58,3 +58,14 @@ message GetHomeRequest {
 message GetHomeResponse {
     Home home = 1;
 }
+
+message Error {
+    string message = 1;
+    int32 code = 2;
+}
+
+message DeleteHomeRequest {
+    int64 id = 1;
+}
+
+message DeleteHomeResponse {}
