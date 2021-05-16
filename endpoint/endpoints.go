@@ -14,6 +14,10 @@ type Endpoints struct {
 	GetCrime	 	endpoint.Endpoint
 	UpdateCrime 	endpoint.Endpoint
 	DeleteCrime 	endpoint.Endpoint
+
+	CreateHome 		endpoint.Endpoint
+	GetHome 		endpoint.Endpoint
+	DeleteHome 		endpoint.Endpoint
 }
 
 func NewEndpointsFactory(s service.Service, log log.Logger) Endpoints {
@@ -38,12 +42,23 @@ func NewEndpointsFactory(s service.Service, log log.Logger) Endpoints {
 		deleteCrime = MakeDeleteCrimeEndpoint(s)
 	}
 
+	var createHome endpoint.Endpoint
+	{
+		createHome = MakeCreateHomeEndpoint(s)
+	}
+	var getHome endpoint.Endpoint
+	{
+		getHome = MakeGetHomeEndpoint(s)
+	}
+
 	return Endpoints{
 		CreateCrime: createCrime,
 		GetCrimes: getCrimes,
 		GetCrime: getCrime,
 		UpdateCrime: updateCrime,
 		DeleteCrime: deleteCrime,
+		CreateHome: createHome,
+		GetHome: getHome,
 	}
 }
 
@@ -131,5 +146,45 @@ func MakeDeleteCrimeEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(*DeleteCrimeRequest)
 		return nil, s.DeleteCrime(ctx, req.ID)
+	}
+}
+
+type CreateHomeRequest struct {
+	domain.Home
+}
+
+type CreateHomeResponse struct {
+	domain.Home
+}
+
+func MakeCreateHomeEndpoint(s service.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(*CreateHomeRequest)
+		res, err := s.CreateHome(ctx, &req.Home)
+		if err != nil {
+			return nil, err
+		}
+
+		return CreateHomeResponse{*res}, nil
+	}
+}
+
+type GetHomeRequest struct {
+	ID 	int64
+}
+
+type GetHomeResponse struct {
+	domain.Home
+}
+
+func MakeGetHomeEndpoint(s service.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(*GetHomeRequest)
+		res, err := s.GetHome(ctx, req.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		return GetHomeResponse{*res}, nil
 	}
 }

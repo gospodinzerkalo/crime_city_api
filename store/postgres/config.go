@@ -75,12 +75,22 @@ type store struct {
 var dbTables = []string{
 	`CREATE TABLE IF NOT EXISTS crimes
 	(
-		id SERIAL,
+		id SERIAL PRIMARY KEY,
 		location_name TEXT NOT NULL,
 		longitude NUMERIC,
 		latitude NUMERIC,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		description TEXT,
+		image TEXT
+	);`,
+	`CREATE TABLE IF NOT EXISTS homes
+	(
+		id INT PRIMARY KEY,
+		first_name TEXT,
+		last_name TEXT,
+		user_name TEXT,
+		longitude NUMERIC,
+		latitude NUMERIC,
 		image TEXT
 	);`,
 }

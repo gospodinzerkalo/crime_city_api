@@ -13,6 +13,10 @@ type Service interface {
 	CreateCrime(ctx context.Context, crime *domain.Crime) (*domain.Crime, error)
 	UpdateCrime(ctx context.Context, crime *domain.Crime) (*domain.Crime, error)
 	DeleteCrime(ctx context.Context, id int64) error
+
+	CreateHome(ctx context.Context, home *domain.Home) (*domain.Home, error)
+	GetHome(ctx context.Context, id int64) (*domain.Home, error)
+	DeleteHome(ctx context.Context, id int64) error
 }
 
 
@@ -45,3 +49,14 @@ func(s service) DeleteCrime(ctx context.Context, id int64) error {
 	return s.store.DeleteCrime(id)
 }
 
+func (s service) CreateHome(ctx context.Context, home *domain.Home) (*domain.Home, error) {
+	return s.store.CreateHome(home)
+}
+
+func (s service) GetHome(ctx context.Context, id int64) (*domain.Home, error) {
+	return s.store.GetHome(id)
+}
+
+func (s service) DeleteHome(ctx context.Context, id int64) error {
+	return s.store.DeleteHome(id)
+}
