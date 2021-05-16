@@ -105,7 +105,7 @@ func (g *gRPCServer) CreateHome(ctx context.Context, request *pb.CreateHomeReque
 
 func decodeCreateHomeRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(*pb.CreateHomeRequest)
-	return endpoint.CreateHomeRequest{
+	return &endpoint.CreateHomeRequest{
 		ID:        req.Home.Id,
 		FirstName: req.Home.FirstName,
 		LastName:  req.Home.LastName,
@@ -131,12 +131,15 @@ func encodeCreateHomeResponse(_ context.Context, response interface{}) (interfac
 
 func (g *gRPCServer) GetHome(ctx context.Context, request *pb.GetHomeRequest) (*pb.GetHomeResponse, error) {
 	_, resp, err := g.getHome.ServeGRPC(ctx, request)
-	return resp.(*pb.GetHomeResponse), err
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*pb.GetHomeResponse), nil
 }
 
 func decodeGetHomeRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(*pb.GetHomeRequest)
-	return endpoint.GetHomeRequest{ID: req.Id}, nil
+	return &endpoint.GetHomeRequest{ID: req.Id}, nil
 }
 
 func encodeGetHomeResponse(_ context.Context, response interface{}) (interface{}, error) {
