@@ -19,6 +19,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"github.com/streadway/amqp"
 )
 
 var (
@@ -163,6 +164,61 @@ func rpc(c *cli.Context) error {
 	return nil
 }
 
+func rabbitMQ(c *cli.Context) error {
+	parseEnv()
+	endpoints, logger, err := initConfig()
+	if err != nil {
+		return nil
+	}
+
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	failOnError(err, "Failed to connect to RabbitMQ")
+
+	ch, err := conn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	q, err := ch.QueueDeclare(
+		"hello", // name
+		false,   // durable
+		false,   // delete when unused
+		false,   // exclusive
+		false,   // no-wait
+		nil,     // arguments
+	)
+
+	amqpPublisher := transport.NewRabbitMqServer(*endpoints, nil, transport.RabbitMQConfig{
+		Channel: ch,
+		Queue:   &q,
+	})
+	var g group.Group
+	{
+		g.Add(func() error {
+			return nil
+		}, func(error) {
+
+		})
+	}
+	{
+		// This function just sits and waits for ctrl-C.
+		cancelInterrupt := make(chan struct{})
+		g.Add(func() error {
+			c := make(chan os.Signal, 1)
+			signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+			select {
+			case sig := <-c:
+				return fmt.Errorf("received signal %s", sig)
+			case <-cancelInterrupt:
+				return nil
+			}
+		}, func(error) {
+			close(cancelInterrupt)
+		})
+	}
+	logger.Log("exit", g.Run())
+	return nil
+}
+
 func initConfig() (*endpoint.Endpoints, log.Logger, error) {
 	postgresConfig := postgres.Config{
 		Host:             postgreHost,
@@ -190,4 +246,11 @@ func initConfig() (*endpoint.Endpoints, log.Logger, error) {
 	endpoints := endpoint.NewEndpointsFactory(svc, logger)
 
 	return &endpoints, logger, nil
+}
+
+func failOnError(err error, msg string) {
+	if err != nil {
+		fmt.Printf("%s: %s", msg, err)
+		os.Exit(1)
+	}
 }

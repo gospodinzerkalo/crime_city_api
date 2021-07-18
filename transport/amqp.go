@@ -6,15 +6,32 @@ import (
 	"github.com/gospodinzerkalo/crime_city_api/endpoint"
 	"github.com/nats-io/nats-server/v2/logger"
 	"github.com/streadway/amqp"
+	"log"
 )
 
 type amqpServer struct {
 	sendCrime 	*amqpTr.Publisher
 }
 
-func NewRabbitMqServer(endpoints endpoint.Endpoints, log logger.Logger) *amqpServer {
+type RabbitMQConfig struct {
+	Channel 	*amqp.Channel
+	Queue 		*amqp.Queue
+}
+
+func NewRabbitMqServer(endpoints endpoint.Endpoints, log *logger.Logger, conf RabbitMQConfig) *amqpServer {
 	return &amqpServer{
-		sendCrime: amqpTr.NewPublisher(nil,nil,encodeSendCrimeAmqpResponse, decodeSendCrimeAmqpRequest),
+		sendCrime: amqpTr.NewPublisher(
+			conf.Channel,
+			conf.Queue,
+			encodeSendCrimeAmqpResponse,
+			decodeSendCrimeAmqpRequest,
+			),
+	}
+}
+
+func failOnError(err error, msg string) {
+	if err != nil {
+		log.Fatalf("%s: %s", msg, err)
 	}
 }
 
