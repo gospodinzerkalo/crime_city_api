@@ -12,6 +12,7 @@ import (
 	"github.com/gospodinzerkalo/crime_city_api/transport"
 	"github.com/joho/godotenv"
 	"github.com/oklog/oklog/pkg/group"
+	"github.com/streadway/amqp"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 	"net"
@@ -19,7 +20,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"github.com/streadway/amqp"
 )
 
 var (
@@ -65,6 +65,12 @@ func main() {
 			Action: rpc,
 			Flags: flags,
 			Usage: "start rpc server",
+		},
+		&cli.Command{
+			Name: "amqp",
+			Action: rabbitMQ,
+			Flags: flags,
+			Usage: "start amqp server",
 		},
 	}
 	fmt.Println(app.Run(os.Args))
@@ -168,7 +174,7 @@ func rabbitMQ(c *cli.Context) error {
 	parseEnv()
 	endpoints, logger, err := initConfig()
 	if err != nil {
-		return nil
+		return err
 	}
 
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
@@ -178,27 +184,10 @@ func rabbitMQ(c *cli.Context) error {
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
-	q, err := ch.QueueDeclare(
-		"hello", // name
-		false,   // durable
-		false,   // delete when unused
-		false,   // exclusive
-		false,   // no-wait
-		nil,     // arguments
-	)
-
-	amqpPublisher := transport.NewRabbitMqServer(*endpoints, nil, transport.RabbitMQConfig{
+	_ = transport.NewRabbitMqServer(*endpoints, logger, transport.RabbitMQConfig{
 		Channel: ch,
-		Queue:   &q,
 	})
 	var g group.Group
-	{
-		g.Add(func() error {
-			return nil
-		}, func(error) {
-
-		})
-	}
 	{
 		// This function just sits and waits for ctrl-C.
 		cancelInterrupt := make(chan struct{})

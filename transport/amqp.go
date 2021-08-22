@@ -4,8 +4,8 @@ import (
 	"context"
 	amqpTr "github.com/go-kit/kit/transport/amqp"
 	"github.com/gospodinzerkalo/crime_city_api/endpoint"
-	"github.com/nats-io/nats-server/v2/logger"
 	"github.com/streadway/amqp"
+	"github.com/go-kit/kit/log"
 )
 
 type amqpServer struct {
@@ -16,7 +16,7 @@ type RabbitMQConfig struct {
 	Channel 	*amqp.Channel
 }
 
-func NewRabbitMqServer(endpoints endpoint.Endpoints, log *logger.Logger, conf RabbitMQConfig) error {
+func NewRabbitMqServer(endpoints endpoint.Endpoints, logg log.Logger, conf RabbitMQConfig) error {
 	qSendCrime, err := conf.Channel.QueueDeclare(
 		"send_crime", // name
 		false,   // durable
@@ -46,21 +46,20 @@ func NewRabbitMqServer(endpoints endpoint.Endpoints, log *logger.Logger, conf Ra
 	)
 
 	qSendCrimeListener := qSendCrimeAMQPHandler.ServeDelivery(conf.Channel)
-
 	forever := make(chan bool)
 
 	go func() {
 		for true {
 			select {
 			case uppercaseDeliv := <-qSendCrimeMsgs:
-				log.Noticef("received \"send_crime\" request")
+				logg.Log("received \"send_crime\" request")
 				qSendCrimeListener(&uppercaseDeliv)
 				uppercaseDeliv.Ack(false)
 			}
 		}
 	}()
 
-	log.Noticef("listening")
+	logg.Log("listening")
 	<-forever
 	return nil
 }
