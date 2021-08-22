@@ -1,11 +1,16 @@
-#Crime API
+# Crime API
 
-##Usage
-###Rest
+## Usage
+### Rest
 ```shell
 make rest
 ```
-###gRPC
+### gRPC
 ```shell
 make rpc
+```
+
+### amqp
+```shell
+make amqp
 ```
