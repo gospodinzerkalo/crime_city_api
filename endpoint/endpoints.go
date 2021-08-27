@@ -220,3 +220,22 @@ func MakeDeleteHomeEndpoint(s service.Service) endpoint.Endpoint {
 		return DeleteHomeResponse{}, s.DeleteHome(ctx, req.ID)
 	}
 }
+
+type CheckHomeRequest struct {
+	ID 		string
+}
+
+type CheckHomeResponse struct {
+	LocationName 		string 		`json:"location_name"`
+	Description			string  	`json:"description"`
+	Url 				string 		`json:"url"`
+	Distance 			float64		`json:"distance"`
+}
+
+func MakeCheckHomeEndpoint(s service.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(*CheckHomeRequest)
+
+
+	}
+}

@@ -10,7 +10,7 @@ require (
 	github.com/nats-io/nats-server/v2 v2.1.2
 	github.com/oklog/oklog v0.3.2
 	github.com/sirupsen/logrus v1.4.2
-	github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271
+	github.com/streadway/amqp v1.0.0
 	github.com/urfave/cli/v2 v2.3.0
 	google.golang.org/grpc v1.32.0
 	google.golang.org/protobuf v1.26.0

@@ -18,6 +18,7 @@ type gRPCServer struct {
 	createHome		gt.Handler
 	getHome			gt.Handler
 	deleteHome 		gt.Handler
+	checkHome 		gt.Handler
 }
 
 // NewGRPCServer initializes a new gRPC server
@@ -193,4 +194,17 @@ func decodeDeleteHomeRequest(_ context.Context, request interface{}) (interface{
 func encodeDeleteHomeResponse(_ context.Context, response interface{}) (interface{}, error) {
 	_ = response.(endpoint.DeleteHomeResponse)
 	return &pb.DeleteHomeResponse{}, nil
+}
+
+func (g *gRPCServer) CheckHome(ctx context.Context, request *pb.CheckHomeRequest) (*pb.CheckHomeResponse, error) {
+	_, resp, err := g.checkHome.ServeGRPC(ctx, request)
+	if err != nil {
+		return nil, grpcErrorEncoder(err)
+	}
+	return resp.(*pb.CheckHomeResponse), nil
+}
+
+func decodeCheckHomeRequest(_ context.Context, request interface{}) (interface{}, error) {
+	req := request.(*pb.CheckHomeRequest)
+	return &endpoint.
 }
