@@ -39,12 +39,12 @@ func (s *store) DeleteHome(id int64) error {
 	return nil
 }
 
-func (s *store) CheckHome(id int64) (*domain.HomeCrime, error) {
+func (s *store) CheckHome(id int64) (*domain.HomeCrime, *domain.Home, error) {
 	myHome := domain.Home{}
 	err := s.db.QueryRow("SELECT id, first_name, last_name, user_name, longitude, latitude, image FROM homes WHERE id = $1", id).
 		Scan(&myHome.ID, &myHome.FirstName, &myHome.LastName, &myHome.UserName, &myHome.Longitude, &myHome.Latitude, &myHome.Image)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	crime := domain.HomeCrime{}
@@ -62,9 +62,9 @@ func (s *store) CheckHome(id int64) (*domain.HomeCrime, error) {
 		)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &crime, nil
+	return &crime, &myHome, nil
 }
 

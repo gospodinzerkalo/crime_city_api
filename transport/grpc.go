@@ -221,5 +221,6 @@ func encodeCheckHomeResponse(_ context.Context, response interface{}) (interface
 		Description:  resp.Description,
 		Url:          resp.Url,
 		Distance:     resp.Distance,
+		MapImage: 	  resp.MapImage,
 	}, nil
 }

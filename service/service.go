@@ -2,9 +2,12 @@ package service
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/go-kit/kit/log"
 	"github.com/gospodinzerkalo/crime_city_api/domain"
 	"github.com/gospodinzerkalo/crime_city_api/store"
+	"net/http"
 )
 
 type Service interface {
@@ -63,5 +66,22 @@ func (s service) DeleteHome(ctx context.Context, id int64) error {
 }
 
 func (s service) CheckHome(ctx context.Context, id int64) (*domain.HomeCrime, error) {
-	return s.store.CheckHome(id)
+	crime, home, err := s.store.CheckHome(id)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.Get(fmt.Sprintf("https://static-maps.yandex.ru/1.x/?ll=%f,%f&size=450,450&z=14&l=map&pt=%f,%f,home~%f,%f,flag",
+		home.Longitude, home.Latitude, home.Longitude, home.Latitude, crime.Longitude, crime.Latitude))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	var body []byte
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return nil, err
+	}
+	crime.MapImage = body
+
+	return crime, nil
 }

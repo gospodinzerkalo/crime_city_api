@@ -238,6 +238,7 @@ type CheckHomeResponse struct {
 	Description			string  	`json:"description"`
 	Url 				string 		`json:"url"`
 	Distance 			float64		`json:"distance"`
+	MapImage 			[]byte		`json:"map_image"`
 }
 
 func MakeCheckHomeEndpoint(s service.Service) endpoint.Endpoint {
@@ -253,6 +254,7 @@ func MakeCheckHomeEndpoint(s service.Service) endpoint.Endpoint {
 			Description:  resp.Description,
 			Url:          resp.Image,
 			Distance:     resp.Distance,
+			MapImage: resp.MapImage,
 		}, nil
 	}
 }

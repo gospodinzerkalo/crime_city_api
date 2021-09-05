@@ -13,4 +13,5 @@ type Crime struct {
 type HomeCrime struct {
 	Crime
 	Distance 	float64		`json:"distance"`
+	MapImage 	[]byte		`json:"map_image"`
 }
