@@ -12,4 +12,5 @@ type Repository interface {
 	CreateHome(home *domain.Home) (*domain.Home, error)
 	GetHome(id int64) (*domain.Home, error)
 	DeleteHome(id int64) error
+	CheckHome(id int64) (*domain.HomeCrime, error)
 }

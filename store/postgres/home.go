@@ -39,3 +39,32 @@ func (s *store) DeleteHome(id int64) error {
 	return nil
 }
 
+func (s *store) CheckHome(id int64) (*domain.HomeCrime, error) {
+	myHome := domain.Home{}
+	err := s.db.QueryRow("SELECT id, first_name, last_name, user_name, longitude, latitude, image FROM homes WHERE id = $1", id).
+		Scan(&myHome.ID, &myHome.FirstName, &myHome.LastName, &myHome.UserName, &myHome.Longitude, &myHome.Latitude, &myHome.Image)
+	if err != nil {
+		return nil, err
+	}
+
+	crime := domain.HomeCrime{}
+
+	err = s.db.QueryRow("SELECT id, location_name,longitude,latitude,created_at,description,image,calculate_distance($1, $2, latitude, longitude, 'K') as distance FROM crimes ORDER BY distance",
+		myHome.Latitude, myHome.Longitude).
+		Scan(&crime.ID,
+			&crime.LocationName,
+			&crime.Longitude,
+			&crime.Latitude,
+			&crime.Date,
+			&crime.Description,
+			&crime.Image,
+			&crime.Distance,
+		)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &crime, nil
+}
+

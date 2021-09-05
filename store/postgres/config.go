@@ -93,6 +93,7 @@ var dbTables = []string{
 		latitude NUMERIC,
 		image TEXT
 	);`,
+	// function that calculates between two lat and lon
 	`CREATE OR REPLACE FUNCTION calculate_distance(lat1 float, lon1 float, lat2 float, lon2 float, units varchar)
 		RETURNS float AS $dist$
 			DECLARE
