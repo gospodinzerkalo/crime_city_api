@@ -18,6 +18,7 @@ type Endpoints struct {
 	CreateHome 		endpoint.Endpoint
 	GetHome 		endpoint.Endpoint
 	DeleteHome 		endpoint.Endpoint
+	CheckHome 		endpoint.Endpoint
 }
 
 func NewEndpointsFactory(s service.Service, log log.Logger) Endpoints {
@@ -55,6 +56,12 @@ func NewEndpointsFactory(s service.Service, log log.Logger) Endpoints {
 		deleteHome = MakeDeleteHomeEndpoint(s)
 	}
 
+	var checkHome endpoint.Endpoint
+	{
+		deleteHome = MakeCheckHomeEndpoint(s)
+	}
+
+
 	return Endpoints{
 		CreateCrime: createCrime,
 		GetCrimes: getCrimes,
@@ -64,6 +71,7 @@ func NewEndpointsFactory(s service.Service, log log.Logger) Endpoints {
 		CreateHome: createHome,
 		GetHome: getHome,
 		DeleteHome: deleteHome,
+		CheckHome: checkHome,
 	}
 }
 
@@ -222,7 +230,7 @@ func MakeDeleteHomeEndpoint(s service.Service) endpoint.Endpoint {
 }
 
 type CheckHomeRequest struct {
-	ID 		string
+	ID 		int64
 }
 
 type CheckHomeResponse struct {
@@ -235,7 +243,16 @@ type CheckHomeResponse struct {
 func MakeCheckHomeEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(*CheckHomeRequest)
+		resp, err := s.CheckHome(ctx, req.ID)
+		if err != nil {
+			return nil, err
+		}
 
-
+		return CheckHomeResponse{
+			LocationName: resp.LocationName,
+			Description:  resp.Description,
+			Url:          resp.Image,
+			Distance:     resp.Distance,
+		}, nil
 	}
 }

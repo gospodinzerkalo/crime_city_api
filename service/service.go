@@ -17,6 +17,7 @@ type Service interface {
 	CreateHome(ctx context.Context, home *domain.Home) (*domain.Home, error)
 	GetHome(ctx context.Context, id int64) (*domain.Home, error)
 	DeleteHome(ctx context.Context, id int64) error
+	CheckHome(ctx context.Context, id int64) (*domain.HomeCrime, error)
 }
 
 
@@ -59,4 +60,8 @@ func (s service) GetHome(ctx context.Context, id int64) (*domain.Home, error) {
 
 func (s service) DeleteHome(ctx context.Context, id int64) error {
 	return s.store.DeleteHome(id)
+}
+
+func (s service) CheckHome(ctx context.Context, id int64) (*domain.HomeCrime, error) {
+	return s.store.CheckHome(id)
 }

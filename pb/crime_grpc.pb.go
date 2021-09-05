@@ -89,7 +89,7 @@ func (c *crimeServiceClient) CheckHome(ctx context.Context, in *CheckHomeRequest
 }
 
 // CrimeServiceServer is the server API for CrimeService service.
-// All implementations must embed UnimplementedCrimeServiceServer
+// All implementations should embed UnimplementedCrimeServiceServer
 // for forward compatibility
 type CrimeServiceServer interface {
 	GetCrimes(context.Context, *GetCrimesRequest) (*GetCrimesResponse, error)
@@ -98,10 +98,9 @@ type CrimeServiceServer interface {
 	GetHome(context.Context, *GetHomeRequest) (*GetHomeResponse, error)
 	DeleteHome(context.Context, *DeleteHomeRequest) (*DeleteHomeResponse, error)
 	CheckHome(context.Context, *CheckHomeRequest) (*CheckHomeResponse, error)
-	mustEmbedUnimplementedCrimeServiceServer()
 }
 
-// UnimplementedCrimeServiceServer must be embedded to have forward compatible implementations.
+// UnimplementedCrimeServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedCrimeServiceServer struct {
 }
 
@@ -123,7 +122,6 @@ func (UnimplementedCrimeServiceServer) DeleteHome(context.Context, *DeleteHomeRe
 func (UnimplementedCrimeServiceServer) CheckHome(context.Context, *CheckHomeRequest) (*CheckHomeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckHome not implemented")
 }
-func (UnimplementedCrimeServiceServer) mustEmbedUnimplementedCrimeServiceServer() {}
 
 // UnsafeCrimeServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to CrimeServiceServer will

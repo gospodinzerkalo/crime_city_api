@@ -48,7 +48,12 @@ func NewGRPCServer(endpoints endpoint.Endpoints, logger log.Logger) pb.CrimeServ
 			endpoints.DeleteHome,
 			decodeDeleteHomeRequest,
 			encodeDeleteHomeResponse,
-			),
+			), 
+			checkHome: gt.NewServer(
+				endpoints.CheckHome,
+				decodeCheckHomeRequest,
+				encodeCheckHomeResponse,
+				),
 	}
 }
 
@@ -206,5 +211,15 @@ func (g *gRPCServer) CheckHome(ctx context.Context, request *pb.CheckHomeRequest
 
 func decodeCheckHomeRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(*pb.CheckHomeRequest)
-	return &endpoint.
+	return &endpoint.CheckHomeRequest{ID: req.Id}, nil
+}
+
+func encodeCheckHomeResponse(_ context.Context, response interface{}) (interface{}, error) {
+	resp := response.(endpoint.CheckHomeResponse)
+	return &pb.CheckHomeResponse{
+		LocationName: resp.LocationName,
+		Description:  resp.Description,
+		Url:          resp.Url,
+		Distance:     resp.Distance,
+	}, nil
 }

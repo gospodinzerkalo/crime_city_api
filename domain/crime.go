@@ -9,3 +9,8 @@ type Crime struct {
 	Image        string  	`json:"image"`
 	Date         string  	`json:"date"`
 }
+
+type HomeCrime struct {
+	Crime
+	Distance 	float64		`json:"distance"`
+}
