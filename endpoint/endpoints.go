@@ -58,7 +58,7 @@ func NewEndpointsFactory(s service.Service, log log.Logger) Endpoints {
 
 	var checkHome endpoint.Endpoint
 	{
-		deleteHome = MakeCheckHomeEndpoint(s)
+		checkHome = MakeCheckHomeEndpoint(s)
 	}
 
 
