@@ -6,6 +6,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/gospodinzerkalo/crime_city_api/endpoint"
+	"github.com/gospodinzerkalo/crime_city_api/middleware"
 	"github.com/gospodinzerkalo/crime_city_api/pb"
 	"github.com/gospodinzerkalo/crime_city_api/service"
 	"github.com/gospodinzerkalo/crime_city_api/store/postgres"
@@ -232,6 +233,10 @@ func initConfig() (*endpoint.Endpoints, log.Logger, error) {
 	}
 
 	svc := service.NewService(store, logger)
+	svc = middleware.LoggingMiddleWare{
+		Logger: logger,
+		Next:   svc,
+	}
 	endpoints := endpoint.NewEndpointsFactory(svc, logger)
 
 	return &endpoints, logger, nil
