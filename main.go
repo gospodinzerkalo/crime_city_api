@@ -21,6 +21,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
+	stdprometheus "github.com/prometheus/client_golang/prometheus"
 )
 
 var (
@@ -219,6 +221,26 @@ func initConfig() (*endpoint.Endpoints, log.Logger, error) {
 		Params:           "",
 		ConnectionString: "",
 	}
+	var fieldKeys = []string{"method", "error"}
+
+	requestCount := kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
+		Namespace: "my_group",
+		Subsystem: "CrimeService",
+		Name:      "request_count",
+		Help:      "Number of requests received.",
+	}, fieldKeys)
+	requestLatency := kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+		Namespace: "my_group",
+		Subsystem: "CrimeService",
+		Name:      "request_latency_microseconds",
+		Help:      "Total duration of requests in microseconds.",
+	}, fieldKeys)
+	countResult := kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+		Namespace: "my_group",
+		Subsystem: "CrimeService",
+		Name:      "count_result",
+		Help:      "The result of each count method.",
+	}, []string{})
 
 	var logger log.Logger
 	{
@@ -237,6 +259,14 @@ func initConfig() (*endpoint.Endpoints, log.Logger, error) {
 		Logger: logger,
 		Next:   svc,
 	}
+
+	svc = middleware.InstrumentingMiddleware{
+		RequestCount:   requestCount,
+		RequestLatency: requestLatency,
+		CountResult:    countResult,
+		Next:           svc,
+	}
+	
 	endpoints := endpoint.NewEndpointsFactory(svc, logger)
 
 	return &endpoints, logger, nil
