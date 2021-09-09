@@ -1,17 +1,18 @@
-package middleware
+package service
 
 import (
 	"context"
 	"fmt"
 	"github.com/go-kit/kit/log"
 	"github.com/gospodinzerkalo/crime_city_api/domain"
-	"github.com/gospodinzerkalo/crime_city_api/service"
 	"time"
 )
 
+// Logging Middleware in application level
+
 type LoggingMiddleWare struct {
 	Logger 	log.Logger
-	Next 	service.Service
+	Next 	Service
 }
 
 func (m LoggingMiddleWare) GetCrimes(ctx context.Context) (res *[]domain.Crime, err error) {

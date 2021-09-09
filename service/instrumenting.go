@@ -1,19 +1,20 @@
-package middleware
+package service
 
 import (
 	"context"
 	"fmt"
 	"github.com/go-kit/kit/metrics"
 	"github.com/gospodinzerkalo/crime_city_api/domain"
-	"github.com/gospodinzerkalo/crime_city_api/service"
 	"time"
 )
+
+// Instrumenting Middleware in application level
 
 type InstrumentingMiddleware struct {
 	RequestCount   metrics.Counter
 	RequestLatency metrics.Histogram
 	CountResult    metrics.Histogram
-	Next           service.Service
+	Next           Service
 }
 
 func (i InstrumentingMiddleware) GetCrimes(ctx context.Context) (res *[]domain.Crime, err error) {

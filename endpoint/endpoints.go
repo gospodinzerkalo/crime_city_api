@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/metrics"
 	"github.com/gospodinzerkalo/crime_city_api/domain"
 	"github.com/gospodinzerkalo/crime_city_api/service"
 )
@@ -21,44 +22,62 @@ type Endpoints struct {
 	CheckHome 		endpoint.Endpoint
 }
 
-func NewEndpointsFactory(s service.Service, log log.Logger) Endpoints {
+func NewEndpointsFactory(s service.Service, logger log.Logger, duration metrics.Histogram) Endpoints {
 	var createCrime endpoint.Endpoint
 	{
 		createCrime = MakeCreateCrimeEndpoint(s)
+		createCrime = LoggingMiddleware(log.With(logger, "method", "createCrime")) (createCrime)
+		createCrime = InstrumentingMiddleware(duration.With("method", "createCrime"))(createCrime)
 	}
 	var getCrimes endpoint.Endpoint
 	{
 		getCrimes = MakeGetCrimesEndpoint(s)
+		getCrimes = LoggingMiddleware(log.With(logger, "method", "getCrimes")) (getCrimes)
+		getCrimes = InstrumentingMiddleware(duration.With("method", "getCrimes"))(getCrimes)
 	}
 	var getCrime endpoint.Endpoint
 	{
 		getCrime = MakeGetCrimeEndpoint(s)
+		getCrime = LoggingMiddleware(log.With(logger, "method", "getCrime")) (getCrime)
+		getCrime = InstrumentingMiddleware(duration.With("method", "getCrime"))(getCrime)
 	}
 	var updateCrime endpoint.Endpoint
 	{
 		updateCrime = MakeUpdateCrimeEndpoint(s)
+		updateCrime = LoggingMiddleware(log.With(logger, "method", "updateCrime")) (updateCrime)
+		updateCrime = InstrumentingMiddleware(duration.With("method", "updateCrime"))(updateCrime)
 	}
 	var deleteCrime endpoint.Endpoint
 	{
 		deleteCrime = MakeDeleteCrimeEndpoint(s)
+		deleteCrime = LoggingMiddleware(log.With(logger, "method", "deleteCrime")) (deleteCrime)
+		deleteCrime = InstrumentingMiddleware(duration.With("method", "deleteCrime"))(deleteCrime)
 	}
 
 	var createHome endpoint.Endpoint
 	{
 		createHome = MakeCreateHomeEndpoint(s)
+		createHome = LoggingMiddleware(log.With(logger, "method", "createHome")) (createHome)
+		createHome = InstrumentingMiddleware(duration.With("method", "createHome"))(createHome)
 	}
 	var getHome endpoint.Endpoint
 	{
 		getHome = MakeGetHomeEndpoint(s)
+		getHome = LoggingMiddleware(log.With(logger, "method", "getHome")) (getHome)
+		getHome = InstrumentingMiddleware(duration.With("method", "getHome"))(getHome)
 	}
 	var deleteHome endpoint.Endpoint
 	{
 		deleteHome = MakeDeleteHomeEndpoint(s)
+		deleteHome = LoggingMiddleware(log.With(logger, "method", "deleteHome")) (deleteHome)
+		deleteHome = InstrumentingMiddleware(duration.With("method", "deleteHome"))(deleteHome)
 	}
 
 	var checkHome endpoint.Endpoint
 	{
 		checkHome = MakeCheckHomeEndpoint(s)
+		checkHome = LoggingMiddleware(log.With(logger, "method", "checkHome")) (checkHome)
+		checkHome = InstrumentingMiddleware(duration.With("method", "checkHome"))(checkHome)
 	}
 
 

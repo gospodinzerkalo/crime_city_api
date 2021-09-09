@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/kit/metrics"
+	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	"github.com/gospodinzerkalo/crime_city_api/endpoint"
-	"github.com/gospodinzerkalo/crime_city_api/middleware"
 	"github.com/gospodinzerkalo/crime_city_api/pb"
 	"github.com/gospodinzerkalo/crime_city_api/service"
 	"github.com/gospodinzerkalo/crime_city_api/store/postgres"
 	"github.com/gospodinzerkalo/crime_city_api/transport"
 	"github.com/joho/godotenv"
 	"github.com/oklog/oklog/pkg/group"
+	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/streadway/amqp"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
@@ -21,8 +23,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
-	stdprometheus "github.com/prometheus/client_golang/prometheus"
 )
 
 var (
@@ -242,6 +242,17 @@ func initConfig() (*endpoint.Endpoints, log.Logger, error) {
 		Help:      "The result of each count method.",
 	}, []string{})
 
+	var duration metrics.Histogram
+	{
+		// Endpoint-level metrics.
+		duration = kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+			Namespace: "example",
+			Subsystem: "CrimeService",
+			Name:      "request_duration_seconds",
+			Help:      "Request duration in seconds.",
+		}, []string{"method", "success"})
+	}
+
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stderr)
@@ -255,19 +266,19 @@ func initConfig() (*endpoint.Endpoints, log.Logger, error) {
 	}
 
 	svc := service.NewService(store, logger)
-	svc = middleware.LoggingMiddleWare{
+	svc = service.LoggingMiddleWare{
 		Logger: logger,
 		Next:   svc,
 	}
 
-	svc = middleware.InstrumentingMiddleware{
+	svc = service.InstrumentingMiddleware{
 		RequestCount:   requestCount,
 		RequestLatency: requestLatency,
 		CountResult:    countResult,
 		Next:           svc,
 	}
 	
-	endpoints := endpoint.NewEndpointsFactory(svc, logger)
+	endpoints := endpoint.NewEndpointsFactory(svc, logger, duration)
 
 	return &endpoints, logger, nil
 }
