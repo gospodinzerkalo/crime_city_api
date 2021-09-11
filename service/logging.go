@@ -118,7 +118,7 @@ func (m LoggingMiddleWare) CheckHome(ctx context.Context, id int64) (home *domai
 		_ = m.Logger.Log(
 			"method", "CheckHome",
 			"input", id,
-			"output", fmt.Sprintf("%v", home),
+			"output", nil,
 			"err", err,
 			"took", time.Since(begin),
 		)
