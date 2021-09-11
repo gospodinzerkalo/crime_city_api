@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/go-kit/kit/log"
 	"github.com/gospodinzerkalo/crime_city_api/domain"
 	"github.com/gospodinzerkalo/crime_city_api/store"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -77,10 +77,11 @@ func (s service) CheckHome(ctx context.Context, id int64) (*domain.HomeCrime, er
 		return nil, err
 	}
 	defer resp.Body.Close()
-	var body []byte
-	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
 		return nil, err
 	}
+
 	crime.MapImage = body
 
 	return crime, nil
