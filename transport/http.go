@@ -67,7 +67,13 @@ func MakeHTTPHandler(endpoints endpoint.Endpoints, log log.Logger) http.Handler 
 
 func errorEncoder(_ context.Context, err error, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	json.NewEncoder(w).Encode(err)
+	switch err {
+	case service.ErrIdIncorrect, service.ErrInvalidData, service.ErrInvalidPathParam:
+		w.WriteHeader(http.StatusBadRequest)
+	case service.ErrNotFound:
+		w.WriteHeader(http.StatusNotFound)
+	}
+	json.NewEncoder(w).Encode(err.Error())
 }
 
 func encodeHTTPGenericResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
@@ -83,7 +89,7 @@ func decodeHTTPCreateCrimeRequest(_ context.Context, r *http.Request) (interface
 	req := &endpoint.CreateCrimeRequest{}
 
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		return nil, err
+		return nil, service.ErrInvalidData
 	}
 
 	return req, nil
